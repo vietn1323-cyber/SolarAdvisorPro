@@ -1,0 +1,5 @@
+# Nội dung .gitignore
+__pycache__/
+*.pyc
+venv/
+.env

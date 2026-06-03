@@ -1,0 +1,4 @@
+# Nội dung requirements.txt
+streamlit==1.29.0
+pandas==2.1.4
+plotly==5.18.0
