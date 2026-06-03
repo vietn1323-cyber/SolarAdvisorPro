@@ -1,4 +1,7 @@
-# Nội dung requirements.txt
-streamlit==1.29.0
+streamlit==1.32.0
 pandas==2.1.4
+numpy==1.26.2
 plotly==5.18.0
+reportlab==4.0.9
+gspread==5.12.4
+google-auth==2.25.2
