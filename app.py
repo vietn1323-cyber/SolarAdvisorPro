@@ -193,3 +193,46 @@ elif menu == "📊 Admin Dashboard & CRM":
         
         # Phần quản lý cơ sở dữ liệu khách hàng CRM
         st.markdown("---")
+        st.markdown("### 👥 Danh sách Khách hàng tiềm năng (CRM trực tuyến)")
+        if len(df_crm) > 0:
+            st.dataframe(df_crm, use_container_width=True)
+            
+            # Nút bấm KẾT NỐI THẬT đến Google Sheets sử dụng Secrets
+            if st.button("🔄 ĐỒNG BỘ DỮ LIỆU ĐẨY THẲNG SANG GOOGLE SHEETS"):
+                try:
+                    import gspread
+                    from google.oauth2.service_account import Credentials
+                    
+                    # 1. Định nghĩa quyền truy cập API
+                    scopes = ["https://googleapis.com"]
+                    
+                    # 2. Đọc thông tin cấu hình từ mục Secrets trên Streamlit Cloud
+                    secret_creds = st.secrets["gspread_credentials"]
+                    creds = Credentials.from_service_account_info(secret_creds, scopes=scopes)
+                    client = gspread.authorize(creds)
+                    
+                    # 3. Mở file Google Sheets (Bạn phải tạo sẵn file tên "Solar_CRM" trên Driver)
+                    # Và nhớ Share quyền "Editor" cho email "client_email" trong file JSON của bạn.
+                    sheet = client.open("Solar_CRM").sheet1
+                    
+                    # 4. Xóa dữ liệu cũ, ghi đè toàn bộ dữ liệu CRM mới nhất lên
+                    sheet.clear()
+                    # Thêm hàng tiêu đề (Header)
+                    sheet.append_row(list(df_crm.columns))
+                    # Thêm tất cả các hàng dữ liệu khách hàng
+                    for index, row in df_crm.iterrows():
+                        sheet.append_row(list(row))
+                        
+                    st.success("✅ ĐÃ ĐỒNG BỘ THÀNH CÔNG! Dữ liệu đã được ghi trực tiếp vào Google Sheets.")
+                except Exception as e:
+                    st.error(f"❌ Lỗi kết nối Google Sheets: {e}")
+                    st.info("Mẹo: Hãy đảm bảo bạn đã cấu hình mục 'Secrets' trên Streamlit và tạo file 'Solar_CRM' trên Google Drive!")
+        else:
+            st.info("Chưa có dữ liệu khách hàng nào đăng ký khảo sát từ trang chủ.")
+            
+        # Phần cấu hình giá trị thực tế các gói sản phẩm
+        st.markdown("---")
+        st.markdown("### ⚙️ Cấu hình đơn giá các gói sản phẩm phân phối")
+        for key, val in st.session_state.products.items():
+            new_price = st.number_input(f"Đơn giá cho mỗi kW của {key} (VNĐ):", min_value=0, value=val["price_per_kw"], step=500000)
+            st.session_state.products[key]["price_per_kw"] = new_price
